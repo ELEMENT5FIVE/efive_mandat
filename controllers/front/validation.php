@@ -44,7 +44,7 @@ class Efive_MandatValidationModuleFrontController extends ModuleFrontController
             }
         }
         if (!$authorized) {
-            exit($this->module->getTranslator()->trans('This payment method is not available.', [], 'Modules.Efivemandat.Shop'));
+            exit($this->module->getTranslator()->l('This payment method is not available.'));
         }
 
         $customer = new Customer($cart->id_customer);
@@ -60,7 +60,9 @@ class Efive_MandatValidationModuleFrontController extends ModuleFrontController
             '{mandat_address}' => nl2br(Configuration::get('EFIVE_MANDAT_ADDRESS') ?: ''),
         ];
 
-        $this->module->validateOrder($cart->id, (int) Configuration::get('EFIVE_OS_MANDAT'), $total, $this->module->displayName, null, $mailVars, (int) $currency->id, false, $customer->secure_key);
+        $order_status_id = (int) Configuration::getGlobalValue(Efive_mandat::ORDER_STATE_AWAITING_PAYMENT);
+
+        $this->module->validateOrder($cart->id, $order_status_id, $total, $this->module->displayName, null, $mailVars, (int) $currency->id, false, $customer->secure_key);
         Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
     }
 }

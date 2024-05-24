@@ -19,12 +19,12 @@
 
 
 <dl>
-    <dt>{l s='Amount' d='Modules.Efivemandat.Shop'}</dt>
+    <dt>{l s='Amount' mod='efive_mandat'}</dt>
     <dd>{$total}</dd>
-    <dt>{l s='Name of account owner' d='Modules.Efivemandat.Shop'}</dt>
+    <dt>{l s='Name of account owner' mod='efive_mandat'}</dt>
     <dd>{$mandatEmail}</dd>
-    <dt>{l s='Please include these details' d='Modules.Efivemandat.Shop'}</dt>
+    <dt>{l s='Please include these details' mod='efive_mandat'}</dt>
     <dd>{$mandatDetails nofilter}</dd>
-    <dt>{l s='Bank name' d='Modules.Efivemandat.Shop'}</dt>
+    <dt>{l s='Bank name' mod='efive_mandat'}</dt>
     <dd>{$mandatAddress nofilter}</dd>
 </dl>

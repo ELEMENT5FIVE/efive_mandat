@@ -1,38 +1,26 @@
 {
-  "name": "efive/efive_mandat",
-  "description": "ELEMENT5 Mandat Module",
-  "homepage": "https://my-element5.com",
-  "license": "AFL-3.0",
-  "authors": [
-    {
-      "name": "PrestaShop SA",
-      "email": "contact@prestashop.com"
-    },
-    {
-      "name": "Element5",
-      "email": "commercial@my-element5.com"
-    }
-  ],
-  "require": {
-    "php": ">=5.4"
-  },
-  "require-dev": {
-    "prestashop/php-dev-tools": "^3.4"
-  },
-  "autoload": {
-    "classmap": [
-      "efive_mandat"
+    "name": "elementfive/efive_mandat",
+    "description": "Module to manage administrative mandates for PrestaShop",
+    "authors": [
+        {
+            "name": "Valentin HUARD",
+            "email": "valentin@my-element5.com"
+        }
     ],
-    "exclude-from-classmap": []
-  },
-  "config": {
-    "preferred-install": "dist",
-    "classmap-authoritative": true,
-    "optimize-autoloader": true,
-    "prepend-autoloader": false,
-    "platform": {
-      "php": "5.4"
-    }
-  },
-  "type": "prestashop-module"
+    "require": {
+        "php": ">=5.6.0"
+    },
+    "autoload": {
+        "classmap": [
+            "efive_mandat.php"
+        ],
+        "exclude-from-classmap": []
+    },
+    "config": {
+        "preferred-install": "dist",
+        "prepend-autoloader": false
+    },
+    "type": "prestashop-module",
+    "author": "Valentin HUARD",
+    "license": "AFL 3.0"
 }

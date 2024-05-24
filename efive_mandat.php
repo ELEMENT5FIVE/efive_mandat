@@ -27,6 +27,7 @@ if (!defined('_PS_VERSION_')) {
 class Efive_Mandat extends PaymentModule
 {
     const FLAG_DISPLAY_PAYMENT_INVITE = 'EFIVE_MANDAT_PAYMENT_INVITE';
+    const ORDER_STATE_AWAITING_PAYMENT = 'EFIVE_MANDAT_OS_AWAITING_PAYMENT';
 
     protected $_html = '';
     protected $_postErrors = [];
@@ -67,14 +68,14 @@ class Efive_Mandat extends PaymentModule
         $this->bootstrap = true;
         parent::__construct();
 
-        $this->displayName = $this->trans('Administrative Mandat', [], 'Modules.Efivemandat.Admin');
-        $this->description = $this->trans('Accept administrative mandat during the checkout.', [], 'Modules.Efivemandat.Admin');
-        $this->confirmUninstall = $this->trans('Are you sure about removing the module ?', [], 'Modules.Efivemandat.Admin');
+        $this->displayName = $this->l('Administrative Mandat');
+        $this->description = $this->l('Accept administrative mandat during the checkout.');
+        $this->confirmUninstall = $this->l('Are you sure about removing the module ?');
         if ((!isset($this->mail) || !isset($this->details) || !isset($this->address)) && $this->active) {
-            $this->warning = $this->trans('The mail and account details must be configured before using this module.', [], 'Modules.Efivemandat.Admin');
+            $this->warning = $this->l('The mail and account details must be configured before using this module.');
         }
         if (!count(Currency::checkPaymentCurrencies($this->id)) && $this->active) {
-            $this->warning = $this->trans('No currency has been set for this module.', [], 'Modules.Efivemandat.Admin');
+            $this->warning = $this->l('No currency has been set for this module.');
         }
 
         $this->extra_mail_vars = [
@@ -90,6 +91,7 @@ class Efive_Mandat extends PaymentModule
         if (!parent::install()
             || !$this->registerHook('displayPaymentReturn')
             || !$this->registerHook('paymentOptions')
+            || !$this->installOrderState()
         ) {
             return false;
         }
@@ -120,21 +122,21 @@ class Efive_Mandat extends PaymentModule
             );
 
             if (!Tools::getValue('EFIVE_MANDAT_DETAILS')) {
-                $this->_postErrors[] = $this->trans(
+                $this->_postErrors[] = $this->l(
                     'Account details are required.',
                     [],
                     'Modules.Efivemandat.Admin'
                 );
             }
             if (!Tools::getValue('EFIVE_MANDAT_MAIL')) {
-                $this->_postErrors[] = $this->trans(
+                $this->_postErrors[] = $this->l(
                     'Mail is required.',
                     [],
                     'Modules.Efivemandat.Admin'
                 );
             }
             if (!Tools::getValue('EFIVE_MANDAT_ADDRESS')) {
-                $this->_postErrors[] = $this->trans(
+                $this->_postErrors[] = $this->l(
                     'Address is required.',
                     [],
                     'Modules.Efivemandat.Admin'
@@ -204,7 +206,7 @@ class Efive_Mandat extends PaymentModule
 
         $newOption = new PaymentOption();
         $newOption->setModuleName($this->name)
-                ->setCallToActionText($this->trans('Pay using administrative mandat', [], 'Modules.Efivemandat.Shop'))
+                ->setCallToActionText($this->l('Pay using administrative mandat'))
                 ->setAction($this->context->link->getModuleLink($this->name, 'validation', [], true))
                 ->setAdditionalInformation($this->fetch('module:efive_mandat/views/templates/hook/efive_mandat_intro.tpl'));
 
@@ -273,28 +275,28 @@ class Efive_Mandat extends PaymentModule
         $fields_form = [
             'form' => [
                 'legend' => [
-                    'title' => $this->trans('Details', [], 'Modules.Efivemandat.Admin'),
+                    'title' => $this->l('Details'),
                     'icon' => 'icon-envelope',
                 ],
                 'input' => [
                     [
                         'type' => 'text',
-                        'label' => $this->trans('Mail to send the administrative mandat', [], 'Modules.Efivemandat.Admin'),
+                        'label' => $this->l('Mail to send the administrative mandat'),
                         'name' => 'EFIVE_MANDAT_MAIL',
                         'required' => true,
                     ],
                     [
                         'type' => 'textarea',
-                        'label' => $this->trans('List of documents', [], 'Modules.Efivemandat.Admin'),
+                        'label' => $this->l('List of documents'),
                         'name' => 'EFIVE_MANDAT_DETAILS',
-                        'desc' => $this->trans('Change the text of list of documents to return you.', [], 'Modules.Efivemandat.Admin'),
+                        'desc' => $this->l('Change the text of list of documents to return you.'),
                         'required' => true,
                     ],
                     [
                         'type' => 'textarea',
-                        'label' => $this->trans('Address for the mandat', [], 'Modules.Efivemandat.Admin'),
+                        'label' => $this->l('Address for the mandat'),
                         'name' => 'EFIVE_MANDAT_ADDRESS',
-                        'desc' => $this->trans('Address where the mandat should be written to.', [], 'Modules.Efivemandat.Admin'),
+                        'desc' => $this->l('Address where the mandat should be written to.'),
                         'required' => true,
                     ],
                 ],
@@ -306,23 +308,23 @@ class Efive_Mandat extends PaymentModule
         $fields_form_customization = [
             'form' => [
                 'legend' => [
-                    'title' => $this->trans('Customization', [], 'Modules.Efivemandat.Admin'),
+                    'title' => $this->l('Customization'),
                     'icon' => 'icon-cogs',
                 ],
                 'input' => [
                     [
                         'type' => 'textarea',
-                        'label' => $this->trans('Information to the customer', [], 'Modules.Efivemandat.Admin'),
+                        'label' => $this->l('Information to the customer'),
                         'name' => 'EFIVE_MANDAT_CUSTOM_TEXT',
-                        'desc' => $this->trans('Information on the processing (processing time, starting of the shipping...)', [], 'Modules.Efivemandat.Admin'),
+                        'desc' => $this->l('Information on the processing (processing time, starting of the shipping...)'),
                         'lang' => true,
                     ],
                     [
                         'type' => 'switch',
-                        'label' => $this->trans('Display the invitation to pay in the order confirmation page', [], 'Modules.Efivemandat.Admin'),
+                        'label' => $this->l('Display the invitation to pay in the order confirmation page'),
                         'name' => self::FLAG_DISPLAY_PAYMENT_INVITE,
                         'is_bool' => true,
-                        'hint' => $this->trans('Your country\'s legislation may require you to send the invitation to pay by email only. Disabling the option will hide the invitation on the confirmation page.', [], 'Modules.Efivemandat.Admin'),
+                        'hint' => $this->l('Your country\'s legislation may require you to send the invitation to pay by email only. Disabling the option will hide the invitation on the confirmation page.'),
                         'values' => [
                             [
                                 'id' => 'active_on',
@@ -391,7 +393,7 @@ class Efive_Mandat extends PaymentModule
     {
         $cart = $this->context->cart;
         $total = sprintf(
-            $this->trans('%1$s (tax incl.)', [], 'Modules.Efivemandat.Shop'),
+            $this->l('%1$s (tax incl.)'),
             $this->context->getCurrentLocale()->formatPrice($cart->getOrderTotal(true, Cart::BOTH), $this->context->currency->iso_code)
         );
 
@@ -422,5 +424,137 @@ class Efive_Mandat extends PaymentModule
             'mandatEmail' => $mandatEmail,
             'mandatCustomText' => $mandatCustomText,
         ];
+    }
+
+    public function installOrderState()
+    {
+        if (Configuration::getGlobalValue(Efive_mandat::ORDER_STATE_AWAITING_PAYMENT)) {
+
+            $orderState = new OrderState((int) Configuration::getGlobalValue(Efive_mandat::ORDER_STATE_AWAITING_PAYMENT));
+
+            if (Validate::isLoadedObject($orderState) && $this->name === $orderState->module_name) {
+                return true;
+            }
+        }
+
+        return $this->createOrderState(
+            static::ORDER_STATE_AWAITING_PAYMENT,
+            [
+                'en' => 'Awaiting payment by administrative mandat',
+                'fr' => 'En attente du mandat administratif',
+                'es' => 'En espera del mandato administrativo',
+            ],
+            '#000091',
+        );
+    }
+
+    /**
+     * Create custom OrderState used for payment
+     *
+     * @param string $configurationKey Configuration key used to store OrderState identifier
+     * @param array $nameByLangIsoCode An array of name for all languages, default is en
+     * @param string $color Color of the label
+     * @param bool $isLogable consider the associated order as validated
+     * @param bool $isPaid set the order as paid
+     * @param bool $isInvoice allow a customer to download and view PDF versions of his/her invoices
+     * @param bool $isShipped set the order as shipped
+     * @param bool $isDelivery show delivery PDF
+     * @param bool $isPdfDelivery attach delivery slip PDF to email
+     * @param bool $isPdfInvoice attach invoice PDF to email
+     * @param bool $isSendEmail send an email to the customer when his/her order status has changed
+     * @param string $template Only letters, numbers and underscores are allowed. Email template for both .html and .txt
+     * @param bool $isHidden hide this status in all customer orders
+     * @param bool $isUnremovable Disallow delete action for this OrderState
+     * @param bool $isDeleted Set OrderState deleted
+     *
+     * @return bool
+     */
+    private function createOrderState(
+        $configurationKey,
+        array $nameByLangIsoCode,
+        $color,
+        $isLogable = false,
+        $isPaid = false,
+        $isInvoice = false,
+        $isShipped = false,
+        $isDelivery = false,
+        $isPdfDelivery = false,
+        $isPdfInvoice = false,
+        $isSendEmail = false,
+        $template = '',
+        $isHidden = false,
+        $isUnremovable = true,
+        $isDeleted = false
+    ) {
+        $tabNameByLangId = [];
+
+        foreach ($nameByLangIsoCode as $langIsoCode => $name) {
+            foreach (Language::getLanguages(false) as $language) {
+                if (Tools::strtolower($language['iso_code']) === $langIsoCode) {
+                    $tabNameByLangId[(int) $language['id_lang']] = $name;
+                } elseif (isset($nameByLangIsoCode['en'])) {
+                    $tabNameByLangId[(int) $language['id_lang']] = $nameByLangIsoCode['en'];
+                }
+            }
+        }
+
+        $orderState = new OrderState();
+        $orderState->module_name = $this->name;
+        $orderState->name = $tabNameByLangId;
+        $orderState->color = $color;
+        $orderState->logable = $isLogable;
+        $orderState->paid = $isPaid;
+        $orderState->invoice = $isInvoice;
+        $orderState->shipped = $isShipped;
+        $orderState->delivery = $isDelivery;
+        $orderState->pdf_delivery = $isPdfDelivery;
+        $orderState->pdf_invoice = $isPdfInvoice;
+        $orderState->send_email = $isSendEmail;
+        $orderState->hidden = $isHidden;
+        $orderState->unremovable = $isUnremovable;
+        $orderState->template = $template;
+        $orderState->deleted = $isDeleted;
+        $result = (bool) $orderState->add();
+
+        if (false === $result) {
+            $this->_errors[] = sprintf(
+                'Failed to create OrderState %s',
+                $configurationKey
+            );
+
+            return false;
+        }
+
+        $result = (bool) Configuration::updateGlobalValue($configurationKey, (int) $orderState->id);
+
+        if (false === $result) {
+            $this->_errors[] = sprintf(
+                'Failed to save OrderState %s to Configuration',
+                $configurationKey
+            );
+
+            return false;
+        }
+
+        $orderStateImgPath = $this->getLocalPath() . 'views/img/orderstate/' . $configurationKey . '.gif';
+
+        if (false === (bool) Tools::file_exists_cache($orderStateImgPath)) {
+            $this->_errors[] = sprintf(
+                'Failed to find icon file of OrderState %s',
+                $configurationKey
+            );
+
+            return false;
+        }
+
+        if (false === (bool) Tools::copy($orderStateImgPath, _PS_ORDER_STATE_IMG_DIR_ . $orderState->id . '.gif')) {
+            $this->_errors[] = sprintf(
+                'Failed to copy icon of OrderState %s',
+                $configurationKey
+            );
+
+            return false;
+        }
+        return true;
     }
 }

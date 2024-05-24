@@ -40,7 +40,7 @@ class Efive_MandatPaymentModuleFrontController extends ModuleFrontController
         }
 
         $total = sprintf(
-            $this->getTranslator()->trans('%1$s (tax incl.)', [], 'Modules.Efivemandat.Shop'),
+            $this->getTranslator()->l('%1$s (tax incl.)'),
             $this->context->getCurrentLocale()->formatPrice($cart->getOrderTotal(true, Cart::BOTH), $this->context->currency->iso_code)
         );
 
