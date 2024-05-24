@@ -24,70 +24,63 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class Ps_Wirepayment extends PaymentModule
+class Efive_Mandat extends PaymentModule
 {
-    const FLAG_DISPLAY_PAYMENT_INVITE = 'BANK_WIRE_PAYMENT_INVITE';
+    const FLAG_DISPLAY_PAYMENT_INVITE = 'EFIVE_MANDAT_PAYMENT_INVITE';
 
     protected $_html = '';
     protected $_postErrors = [];
 
     public $details;
-    public $owner;
+    public $mail;
     public $address;
     public $extra_mail_vars;
     /**
      * @var int
      */
     public $is_eu_compatible;
-    /**
-     * @var false|int
-     */
-    public $reservation_days;
 
     public function __construct()
     {
-        $this->name = 'ps_wirepayment';
+        $this->name = 'efive_mandat';
         $this->tab = 'payments_gateways';
-        $this->version = '2.2.0';
+        $this->version = '1.0.0';
         $this->ps_versions_compliancy = ['min' => '1.7.6.0', 'max' => _PS_VERSION_];
-        $this->author = 'PrestaShop';
+        $this->author = 'Valentin HUARD';
         $this->controllers = ['payment', 'validation'];
         $this->is_eu_compatible = 1;
 
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
 
-        $config = Configuration::getMultiple(['BANK_WIRE_DETAILS', 'BANK_WIRE_OWNER', 'BANK_WIRE_ADDRESS', 'BANK_WIRE_RESERVATION_DAYS']);
-        if (!empty($config['BANK_WIRE_OWNER'])) {
-            $this->owner = $config['BANK_WIRE_OWNER'];
+        $config = Configuration::getMultiple(['EFIVE_MANDAT_DETAILS', 'EFIVE_MANDAT_MAIL', 'EFIVE_MANDAT_ADDRESS']);
+        if (!empty($config['EFIVE_MANDAT_MAIL'])) {
+            $this->mail = $config['EFIVE_MANDAT_MAIL'];
         }
-        if (!empty($config['BANK_WIRE_DETAILS'])) {
-            $this->details = $config['BANK_WIRE_DETAILS'];
+        if (!empty($config['EFIVE_MANDAT_DETAILS'])) {
+            $this->details = $config['EFIVE_MANDAT_DETAILS'];
         }
-        if (!empty($config['BANK_WIRE_ADDRESS'])) {
-            $this->address = $config['BANK_WIRE_ADDRESS'];
-        }
-        if (!empty($config['BANK_WIRE_RESERVATION_DAYS'])) {
-            $this->reservation_days = $config['BANK_WIRE_RESERVATION_DAYS'];
+        if (!empty($config['EFIVE_MANDAT_ADDRESS'])) {
+            $this->address = $config['EFIVE_MANDAT_ADDRESS'];
         }
 
         $this->bootstrap = true;
         parent::__construct();
 
-        $this->displayName = $this->trans('Wire payment', [], 'Modules.Wirepayment.Admin');
-        $this->description = $this->trans('Accept wire payments by displaying your account details during the checkout.', [], 'Modules.Wirepayment.Admin');
-        $this->confirmUninstall = $this->trans('Are you sure about removing these details?', [], 'Modules.Wirepayment.Admin');
-        if ((!isset($this->owner) || !isset($this->details) || !isset($this->address)) && $this->active) {
-            $this->warning = $this->trans('Account owner and account details must be configured before using this module.', [], 'Modules.Wirepayment.Admin');
+        $this->displayName = $this->trans('Administrative Mandat', [], 'Modules.Efivemandat.Admin');
+        $this->description = $this->trans('Accept administrative mandat during the checkout.', [], 'Modules.Efivemandat.Admin');
+        $this->confirmUninstall = $this->trans('Are you sure about removing the module ?', [], 'Modules.Efivemandat.Admin');
+        if ((!isset($this->mail) || !isset($this->details) || !isset($this->address)) && $this->active) {
+            $this->warning = $this->trans('The mail and account details must be configured before using this module.', [], 'Modules.Efivemandat.Admin');
         }
         if (!count(Currency::checkPaymentCurrencies($this->id)) && $this->active) {
-            $this->warning = $this->trans('No currency has been set for this module.', [], 'Modules.Wirepayment.Admin');
+            $this->warning = $this->trans('No currency has been set for this module.', [], 'Modules.Efivemandat.Admin');
         }
 
         $this->extra_mail_vars = [
-            '{bankwire_owner}' => $this->owner,
-            '{bankwire_details}' => nl2br($this->details ?: ''),
-            '{bankwire_address}' => nl2br($this->address ?: ''),
+            '{mandat_mail}' => $this->mail,
+            '{mandat_details}' => nl2br($this->details ?: ''),
+            '{mandat_address}' => nl2br($this->address ?: ''),
         ];
     }
 
@@ -106,11 +99,10 @@ class Ps_Wirepayment extends PaymentModule
 
     public function uninstall()
     {
-        if (!Configuration::deleteByName('BANK_WIRE_CUSTOM_TEXT')
-                || !Configuration::deleteByName('BANK_WIRE_DETAILS')
-                || !Configuration::deleteByName('BANK_WIRE_OWNER')
-                || !Configuration::deleteByName('BANK_WIRE_ADDRESS')
-                || !Configuration::deleteByName('BANK_WIRE_RESERVATION_DAYS')
+        if (!Configuration::deleteByName('EFIVE_MANDAT_CUSTOM_TEXT')
+                || !Configuration::deleteByName('EFIVE_MANDAT_DETAILS')
+                || !Configuration::deleteByName('EFIVE_MANDAT_MAIL')
+                || !Configuration::deleteByName('EFIVE_MANDAT_ADDRESS')
                 || !Configuration::deleteByName(self::FLAG_DISPLAY_PAYMENT_INVITE)
                 || !parent::uninstall()) {
             return false;
@@ -127,36 +119,25 @@ class Ps_Wirepayment extends PaymentModule
                 Tools::getValue(self::FLAG_DISPLAY_PAYMENT_INVITE)
             );
 
-            if (!Tools::getValue('BANK_WIRE_DETAILS')) {
+            if (!Tools::getValue('EFIVE_MANDAT_DETAILS')) {
                 $this->_postErrors[] = $this->trans(
                     'Account details are required.',
                     [],
-                    'Modules.Wirepayment.Admin'
+                    'Modules.Efivemandat.Admin'
                 );
             }
-            if (!Tools::getValue('BANK_WIRE_OWNER')) {
+            if (!Tools::getValue('EFIVE_MANDAT_MAIL')) {
                 $this->_postErrors[] = $this->trans(
-                    'Account owner is required.',
+                    'Mail is required.',
                     [],
-                    'Modules.Wirepayment.Admin'
+                    'Modules.Efivemandat.Admin'
                 );
             }
-            if (!Tools::getValue('BANK_WIRE_ADDRESS')) {
+            if (!Tools::getValue('EFIVE_MANDAT_ADDRESS')) {
                 $this->_postErrors[] = $this->trans(
-                    'Bank address is required.',
+                    'Address is required.',
                     [],
-                    'Modules.Wirepayment.Admin'
-                );
-            }
-
-            $fieldReservationDays = Tools::getValue('BANK_WIRE_RESERVATION_DAYS');
-            if ($fieldReservationDays && !Validate::isUnsignedInt($fieldReservationDays)) {
-                $this->_postErrors[] = $this->trans(
-                    'The %field% is invalid. Please enter a positive integer.',
-                    [
-                        '%field%' => $this->trans('Reservation period', [], 'Modules.Wirepayment.Admin'),
-                    ],
-                    'Modules.Wirepayment.Admin'
+                    'Modules.Efivemandat.Admin'
                 );
             }
         }
@@ -165,19 +146,18 @@ class Ps_Wirepayment extends PaymentModule
     protected function _postProcess()
     {
         if (Tools::isSubmit('btnSubmit')) {
-            Configuration::updateValue('BANK_WIRE_DETAILS', Tools::getValue('BANK_WIRE_DETAILS'));
-            Configuration::updateValue('BANK_WIRE_OWNER', Tools::getValue('BANK_WIRE_OWNER'));
-            Configuration::updateValue('BANK_WIRE_ADDRESS', Tools::getValue('BANK_WIRE_ADDRESS'));
+            Configuration::updateValue('EFIVE_MANDAT_DETAILS', Tools::getValue('EFIVE_MANDAT_DETAILS'));
+            Configuration::updateValue('EFIVE_MANDAT_MAIL', Tools::getValue('EFIVE_MANDAT_MAIL'));
+            Configuration::updateValue('EFIVE_MANDAT_ADDRESS', Tools::getValue('EFIVE_MANDAT_ADDRESS'));
 
             $custom_text = [];
             $languages = Language::getLanguages(false);
             foreach ($languages as $lang) {
-                if (Tools::getIsset('BANK_WIRE_CUSTOM_TEXT_' . $lang['id_lang'])) {
-                    $custom_text[$lang['id_lang']] = Tools::getValue('BANK_WIRE_CUSTOM_TEXT_' . $lang['id_lang']);
+                if (Tools::getIsset('EFIVE_MANDAT_CUSTOM_TEXT_' . $lang['id_lang'])) {
+                    $custom_text[$lang['id_lang']] = Tools::getValue('EFIVE_MANDAT_CUSTOM_TEXT_' . $lang['id_lang']);
                 }
             }
-            Configuration::updateValue('BANK_WIRE_RESERVATION_DAYS', (int) Tools::getValue('BANK_WIRE_RESERVATION_DAYS'));
-            Configuration::updateValue('BANK_WIRE_CUSTOM_TEXT', $custom_text);
+            Configuration::updateValue('EFIVE_MANDAT_CUSTOM_TEXT', $custom_text);
         }
         $this->_html .= $this->displayConfirmation($this->trans('Settings updated', [], 'Admin.Global'));
     }
@@ -224,9 +204,9 @@ class Ps_Wirepayment extends PaymentModule
 
         $newOption = new PaymentOption();
         $newOption->setModuleName($this->name)
-                ->setCallToActionText($this->trans('Pay by bank wire', [], 'Modules.Wirepayment.Shop'))
+                ->setCallToActionText($this->trans('Pay using administrative mandat', [], 'Modules.Efivemandat.Shop'))
                 ->setAction($this->context->link->getModuleLink($this->name, 'validation', [], true))
-                ->setAdditionalInformation($this->fetch('module:ps_wirepayment/views/templates/hook/ps_wirepayment_intro.tpl'));
+                ->setAdditionalInformation($this->fetch('module:efive_mandat/views/templates/hook/efive_mandat_intro.tpl'));
 
         return [
             $newOption,
@@ -239,19 +219,19 @@ class Ps_Wirepayment extends PaymentModule
             return;
         }
 
-        $bankwireOwner = $this->owner;
-        if (!$bankwireOwner) {
-            $bankwireOwner = '___________';
+        $mandatEmail = $this->mail;
+        if (!$mandatEmail) {
+            $mandatEmail = '___________';
         }
 
-        $bankwireDetails = Tools::nl2br($this->details);
-        if (!$bankwireDetails) {
-            $bankwireDetails = '___________';
+        $mandatDetails = Tools::nl2br($this->details);
+        if (!$mandatDetails) {
+            $mandatDetails = '___________';
         }
 
-        $bankwireAddress = Tools::nl2br($this->address);
-        if (!$bankwireAddress) {
-            $bankwireAddress = '___________';
+        $mandatAddress = Tools::nl2br($this->address);
+        if (!$mandatAddress) {
+            $mandatAddress = '___________';
         }
 
         $totalToPaid = $params['order']->getOrdersTotalPaid() - $params['order']->getTotalPaid();
@@ -261,15 +241,15 @@ class Ps_Wirepayment extends PaymentModule
                 $totalToPaid,
                 (new Currency($params['order']->id_currency))->iso_code
             ),
-            'bankwireDetails' => $bankwireDetails,
-            'bankwireAddress' => $bankwireAddress,
-            'bankwireOwner' => $bankwireOwner,
+            'mandatDetails' => $mandatDetails,
+            'mandatAddress' => $mandatAddress,
+            'mandatEmail' => $mandatEmail,
             'status' => 'ok',
             'reference' => $params['order']->reference,
             'contact_url' => $this->context->link->getPageLink('contact', true),
         ]);
 
-        return $this->fetch('module:ps_wirepayment/views/templates/hook/payment_return.tpl');
+        return $this->fetch('module:efive_mandat/views/templates/hook/payment_return.tpl');
     }
 
     public function checkCurrency($cart)
@@ -293,27 +273,28 @@ class Ps_Wirepayment extends PaymentModule
         $fields_form = [
             'form' => [
                 'legend' => [
-                    'title' => $this->trans('Account details', [], 'Modules.Wirepayment.Admin'),
+                    'title' => $this->trans('Details', [], 'Modules.Efivemandat.Admin'),
                     'icon' => 'icon-envelope',
                 ],
                 'input' => [
                     [
                         'type' => 'text',
-                        'label' => $this->trans('Account owner', [], 'Modules.Wirepayment.Admin'),
-                        'name' => 'BANK_WIRE_OWNER',
+                        'label' => $this->trans('Mail to send the administrative mandat', [], 'Modules.Efivemandat.Admin'),
+                        'name' => 'EFIVE_MANDAT_MAIL',
                         'required' => true,
                     ],
                     [
                         'type' => 'textarea',
-                        'label' => $this->trans('Account details', [], 'Modules.Wirepayment.Admin'),
-                        'name' => 'BANK_WIRE_DETAILS',
-                        'desc' => $this->trans('Such as bank branch, IBAN number, BIC, etc.', [], 'Modules.Wirepayment.Admin'),
+                        'label' => $this->trans('List of documents', [], 'Modules.Efivemandat.Admin'),
+                        'name' => 'EFIVE_MANDAT_DETAILS',
+                        'desc' => $this->trans('Change the text of list of documents to return you.', [], 'Modules.Efivemandat.Admin'),
                         'required' => true,
                     ],
                     [
                         'type' => 'textarea',
-                        'label' => $this->trans('Bank address', [], 'Modules.Wirepayment.Admin'),
-                        'name' => 'BANK_WIRE_ADDRESS',
+                        'label' => $this->trans('Address for the mandat', [], 'Modules.Efivemandat.Admin'),
+                        'name' => 'EFIVE_MANDAT_ADDRESS',
+                        'desc' => $this->trans('Address where the mandat should be written to.', [], 'Modules.Efivemandat.Admin'),
                         'required' => true,
                     ],
                 ],
@@ -325,29 +306,23 @@ class Ps_Wirepayment extends PaymentModule
         $fields_form_customization = [
             'form' => [
                 'legend' => [
-                    'title' => $this->trans('Customization', [], 'Modules.Wirepayment.Admin'),
+                    'title' => $this->trans('Customization', [], 'Modules.Efivemandat.Admin'),
                     'icon' => 'icon-cogs',
                 ],
                 'input' => [
                     [
-                        'type' => 'text',
-                        'label' => $this->trans('Reservation period', [], 'Modules.Wirepayment.Admin'),
-                        'desc' => $this->trans('Number of days the items remain reserved', [], 'Modules.Wirepayment.Admin'),
-                        'name' => 'BANK_WIRE_RESERVATION_DAYS',
-                    ],
-                    [
                         'type' => 'textarea',
-                        'label' => $this->trans('Information to the customer', [], 'Modules.Wirepayment.Admin'),
-                        'name' => 'BANK_WIRE_CUSTOM_TEXT',
-                        'desc' => $this->trans('Information on the bank transfer (processing time, starting of the shipping...)', [], 'Modules.Wirepayment.Admin'),
+                        'label' => $this->trans('Information to the customer', [], 'Modules.Efivemandat.Admin'),
+                        'name' => 'EFIVE_MANDAT_CUSTOM_TEXT',
+                        'desc' => $this->trans('Information on the processing (processing time, starting of the shipping...)', [], 'Modules.Efivemandat.Admin'),
                         'lang' => true,
                     ],
                     [
                         'type' => 'switch',
-                        'label' => $this->trans('Display the invitation to pay in the order confirmation page', [], 'Modules.Wirepayment.Admin'),
+                        'label' => $this->trans('Display the invitation to pay in the order confirmation page', [], 'Modules.Efivemandat.Admin'),
                         'name' => self::FLAG_DISPLAY_PAYMENT_INVITE,
                         'is_bool' => true,
-                        'hint' => $this->trans('Your country\'s legislation may require you to send the invitation to pay by email only. Disabling the option will hide the invitation on the confirmation page.', [], 'Modules.Wirepayment.Admin'),
+                        'hint' => $this->trans('Your country\'s legislation may require you to send the invitation to pay by email only. Disabling the option will hide the invitation on the confirmation page.', [], 'Modules.Efivemandat.Admin'),
                         'values' => [
                             [
                                 'id' => 'active_on',
@@ -395,17 +370,16 @@ class Ps_Wirepayment extends PaymentModule
         $languages = Language::getLanguages(false);
         foreach ($languages as $lang) {
             $custom_text[$lang['id_lang']] = Tools::getValue(
-                'BANK_WIRE_CUSTOM_TEXT_' . $lang['id_lang'],
-                Configuration::get('BANK_WIRE_CUSTOM_TEXT', $lang['id_lang'])
+                'EFIVE_MANDAT_CUSTOM_TEXT_' . $lang['id_lang'],
+                Configuration::get('EFIVE_MANDAT_CUSTOM_TEXT', $lang['id_lang'])
             );
         }
 
         return [
-            'BANK_WIRE_DETAILS' => Tools::getValue('BANK_WIRE_DETAILS', $this->details),
-            'BANK_WIRE_OWNER' => Tools::getValue('BANK_WIRE_OWNER', $this->owner),
-            'BANK_WIRE_ADDRESS' => Tools::getValue('BANK_WIRE_ADDRESS', $this->address),
-            'BANK_WIRE_RESERVATION_DAYS' => Tools::getValue('BANK_WIRE_RESERVATION_DAYS', $this->reservation_days),
-            'BANK_WIRE_CUSTOM_TEXT' => $custom_text,
+            'EFIVE_MANDAT_DETAILS' => Tools::getValue('EFIVE_MANDAT_DETAILS', $this->details),
+            'EFIVE_MANDAT_MAIL' => Tools::getValue('EFIVE_MANDAT_MAIL', $this->mail),
+            'EFIVE_MANDAT_ADDRESS' => Tools::getValue('EFIVE_MANDAT_ADDRESS', $this->address),
+            'EFIVE_MANDAT_CUSTOM_TEXT' => $custom_text,
             self::FLAG_DISPLAY_PAYMENT_INVITE => Tools::getValue(
                 self::FLAG_DISPLAY_PAYMENT_INVITE,
                 Configuration::get(self::FLAG_DISPLAY_PAYMENT_INVITE)
@@ -417,42 +391,36 @@ class Ps_Wirepayment extends PaymentModule
     {
         $cart = $this->context->cart;
         $total = sprintf(
-            $this->trans('%1$s (tax incl.)', [], 'Modules.Wirepayment.Shop'),
+            $this->trans('%1$s (tax incl.)', [], 'Modules.Efivemandat.Shop'),
             $this->context->getCurrentLocale()->formatPrice($cart->getOrderTotal(true, Cart::BOTH), $this->context->currency->iso_code)
         );
 
-        $bankwireOwner = $this->owner;
-        if (!$bankwireOwner) {
-            $bankwireOwner = '___________';
+        $mandatEmail = $this->mail;
+        if (!$mandatEmail) {
+            $mandatEmail = '___________';
         }
 
-        $bankwireDetails = Tools::nl2br($this->details);
-        if (!$bankwireDetails) {
-            $bankwireDetails = '___________';
+        $mandatDetails = Tools::nl2br($this->details);
+        if (!$mandatDetails) {
+            $mandatDetails = '___________';
         }
 
-        $bankwireAddress = Tools::nl2br($this->address);
-        if (!$bankwireAddress) {
-            $bankwireAddress = '___________';
+        $mandatAddress = Tools::nl2br($this->address);
+        if (!$mandatAddress) {
+            $mandatAddress = '___________';
         }
 
-        $bankwireReservationDays = $this->reservation_days;
-        if (false === $bankwireReservationDays) {
-            $bankwireReservationDays = 7;
-        }
-
-        $bankwireCustomText = Tools::nl2br(Configuration::get('BANK_WIRE_CUSTOM_TEXT', $this->context->language->id));
-        if (empty($bankwireCustomText)) {
-            $bankwireCustomText = '';
+        $mandatCustomText = Tools::nl2br(Configuration::get('EFIVE_MANDAT_CUSTOM_TEXT', $this->context->language->id));
+        if (empty($mandatCustomText)) {
+            $mandatCustomText = '';
         }
 
         return [
             'total' => $total,
-            'bankwireDetails' => $bankwireDetails,
-            'bankwireAddress' => $bankwireAddress,
-            'bankwireOwner' => $bankwireOwner,
-            'bankwireReservationDays' => (int) $bankwireReservationDays,
-            'bankwireCustomText' => $bankwireCustomText,
+            'mandatDetails' => $mandatDetails,
+            'mandatAddress' => $mandatAddress,
+            'mandatEmail' => $mandatEmail,
+            'mandatCustomText' => $mandatCustomText,
         ];
     }
 }

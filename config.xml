@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
-	<name>ps_wirepayment</name>
+	<name>efive_mandat</name>
 	<displayName><![CDATA[Wire payment]]></displayName>
 	<version><![CDATA[2.2.0]]></version>
 	<description><![CDATA[Accept payments by bank transfer.]]></description>

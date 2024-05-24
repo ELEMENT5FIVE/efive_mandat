@@ -18,8 +18,8 @@
  *}
 
 <div class="alert alert-info">
-  <img src="../modules/ps_wirepayment/logo.png" style="float:left; margin-right:15px;" height="60">
-  <p><strong>{l s="This module allows you to accept secure payments by bank wire." d='Modules.Wirepayment.Admin'}</strong></p>
-  <p>{l s="If the client chooses to pay by bank wire, the order status will change to 'Waiting for Payment'." d='Modules.Wirepayment.Admin'}</p>
-  <p>{l s="That said, you must manually confirm the order upon receiving the bank wire." d='Modules.Wirepayment.Admin'}</p>
+  <img src="../modules/efive_mandat/logo.png" style="float:left; margin-right:15px;" height="60">
+  <p><strong>{l s="This module allows you to accept secure payments by administrative mandat." d='Modules.Efivemandat.Admin'}</strong></p>
+  <p>{l s="If the client chooses to pay by administrative mandat, the order status will change to 'Waiting for Payment'." d='Modules.Efivemandat.Admin'}</p>
+  <p>{l s="That said, you must manually confirm the order upon receiving the mandat." d='Modules.Efivemandat.Admin'}</p>
 </div>

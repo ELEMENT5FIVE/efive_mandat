@@ -1,12 +1,16 @@
 {
-  "name": "prestashop/ps_wirepayment",
-  "description": "PrestaShop module ps_wirepayment",
-  "homepage": "https://github.com/PrestaShop/ps_wirepayment",
+  "name": "efive/efive_mandat",
+  "description": "ELEMENT5 Mandat Module",
+  "homepage": "https://my-element5.com",
   "license": "AFL-3.0",
   "authors": [
     {
       "name": "PrestaShop SA",
       "email": "contact@prestashop.com"
+    },
+    {
+      "name": "Element5",
+      "email": "commercial@my-element5.com"
     }
   ],
   "require": {
@@ -17,7 +21,7 @@
   },
   "autoload": {
     "classmap": [
-      "ps_wirepayment.php"
+      "efive_mandat"
     ],
     "exclude-from-classmap": []
   },
