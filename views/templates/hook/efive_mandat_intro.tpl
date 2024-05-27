@@ -17,9 +17,8 @@
  * International Registered Trademark & Property of PrestaShop SA
  *}
 
-<p class="payment_module">
-	<a href="{$link->getModuleLink('efive_mandat', 'payment')|escape:'html'}" title="{l s='Pay by administrative mandat' mod='efive_mandat'}">
-		<img src="{$this_path_bw}logo.png" alt="{l s='Pay by administrative mandat' mod='efive_mandat'}" width="86" height="49"/>
-		{l s='Pay by administrative mandat' mod='efive_mandat'}&nbsp;<span>{l s='(order processing will be longer)' mod='efive_mandat'}</span>
-	</a>
-</p>
+<section>
+  <p>
+    {l s='Please transfer the mandat to our email address. You will receive our order confirmation by email containing the details and order number.' mod='efive_mandat'}
+  </p>
+</section>

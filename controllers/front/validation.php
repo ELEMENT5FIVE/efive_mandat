@@ -21,9 +21,9 @@
 /**
  * @since 1.5.0
  *
- * @property Ps_Wirepayment $module
+ * @property Efive_Mandat $module
  */
-class Ps_WirepaymentValidationModuleFrontController extends ModuleFrontController
+class Efive_MandatValidationModuleFrontController extends ModuleFrontController
 {
     /**
      * @see FrontController::postProcess()
@@ -38,13 +38,13 @@ class Ps_WirepaymentValidationModuleFrontController extends ModuleFrontControlle
         // Check that this payment option is still available in case the customer changed his address just before the end of the checkout process
         $authorized = false;
         foreach (Module::getPaymentModules() as $module) {
-            if ($module['name'] == 'ps_wirepayment') {
+            if ($module['name'] == 'efive_mandat') {
                 $authorized = true;
                 break;
             }
         }
         if (!$authorized) {
-            exit($this->module->getTranslator()->trans('This payment method is not available.', [], 'Modules.Wirepayment.Shop'));
+            exit($this->module->getTranslator()->l('This payment method is not available.'));
         }
 
         $customer = new Customer($cart->id_customer);
@@ -55,12 +55,14 @@ class Ps_WirepaymentValidationModuleFrontController extends ModuleFrontControlle
         $currency = $this->context->currency;
         $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
         $mailVars = [
-            '{bankwire_owner}' => Configuration::get('BANK_WIRE_OWNER'),
-            '{bankwire_details}' => nl2br(Configuration::get('BANK_WIRE_DETAILS') ?: ''),
-            '{bankwire_address}' => nl2br(Configuration::get('BANK_WIRE_ADDRESS') ?: ''),
+            '{mandat_owner}' => Configuration::get('EFIVE_MANDAT_MAIL'),
+            '{mandat_details}' => nl2br(Configuration::get('EFIVE_MANDAT_DETAILS') ?: ''),
+            '{mandat_address}' => nl2br(Configuration::get('EFIVE_MANDAT_ADDRESS') ?: ''),
         ];
 
-        $this->module->validateOrder($cart->id, (int) Configuration::get('PS_OS_BANKWIRE'), $total, $this->module->displayName, null, $mailVars, (int) $currency->id, false, $customer->secure_key);
+        $order_status_id = (int) Configuration::getGlobalValue(Efive_mandat::ORDER_STATE_AWAITING_PAYMENT);
+
+        $this->module->validateOrder($cart->id, $order_status_id, $total, $this->module->displayName, null, $mailVars, (int) $currency->id, false, $customer->secure_key);
         Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
     }
 }

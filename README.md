@@ -17,7 +17,7 @@ It can be activated on one store and deactivated on another
 
 ## How to test
 
-Link to specs : https://docs.prestashop-project.org/functional-documentation/functional-documentation/ux-ui/back-office/improve/modules/bank-transfer-ps_wirepayment
+Link to specs : https://docs.prestashop-project.org/functional-documentation/functional-documentation/ux-ui/back-office/improve/modules/bank-transfer-efive_mandat
 
 If module is enabled, check that wire payment method is displayed and available on FO and make sure that the order can be placed.
 Configure the Account details.  Check in FO > Checkout process > Payment step that the account details are well updated.
