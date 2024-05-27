@@ -20,26 +20,5 @@
 <section>
   <p>
     {l s='Please transfer the mandat to our email address. You will receive our order confirmation by email containing the details and order number.' mod='efive_mandat'}
-    {if $mandatCustomText }
-        <a data-toggle="modal" data-target="#bankwire-modal">{l s='More information' mod='efive_mandat'}</a>
-    {/if}
   </p>
-
-  <div class="modal fade" id="bankwire-modal" tabindex="-1" role="dialog" aria-labelledby="Bankwire information" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-          <h2>{l s='Administrative Mandate' mod='efive_mandat'}</h2>
-        </div>
-        <div class="modal-body">
-          <p>{l s='Payment is made by transfer of the mandate to the following:' mod='efive_mandat'}</p>
-          {include file='module:efive_mandat/views/templates/hook/_partials/payment_infos.tpl'}
-          {$mandatCustomText nofilter}
-        </div>
-      </div>
-    </div>
-  </div>
 </section>

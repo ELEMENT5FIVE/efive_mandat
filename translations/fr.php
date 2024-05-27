@@ -40,4 +40,4 @@ $_MODULE['<{efive_mandat}prestashop>efive_mandat_intro_ba0597cdca5f2fe4307b224f8
 $_MODULE['<{efive_mandat}prestashop>payment_infos_b2f40690858b404ed10e62bdf422c704'] = 'Montant';
 $_MODULE['<{efive_mandat}prestashop>payment_infos_5ca0b1b910f393ed1f9f6fa99e414255'] = 'Nom de l\'entreprise';
 $_MODULE['<{efive_mandat}prestashop>payment_infos_51f4741f4c53f0fe3ba1be9ac3a34f2f'] = 'Veuillez inclure ces détails';
-$_MODULE['<{efive_mandat}prestashop>payment_infos_984482eb9ff11e6310fef641d2268a2a'] = 'Adresse bancaire';
+$_MODULE['<{efive_mandat}prestashop>payment_infos_984482eb9ff11e6310fef641d2268a2a'] = 'Adresse de l\'entreprise';

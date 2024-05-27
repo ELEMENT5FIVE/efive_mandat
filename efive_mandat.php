@@ -101,8 +101,7 @@ class Efive_Mandat extends PaymentModule
 
     public function uninstall()
     {
-        if (!Configuration::deleteByName('EFIVE_MANDAT_CUSTOM_TEXT')
-                || !Configuration::deleteByName('EFIVE_MANDAT_DETAILS')
+        if (!Configuration::deleteByName('EFIVE_MANDAT_DETAILS')
                 || !Configuration::deleteByName('EFIVE_MANDAT_MAIL')
                 || !Configuration::deleteByName('EFIVE_MANDAT_ADDRESS')
                 || !Configuration::deleteByName(self::FLAG_DISPLAY_PAYMENT_INVITE)
@@ -151,15 +150,6 @@ class Efive_Mandat extends PaymentModule
             Configuration::updateValue('EFIVE_MANDAT_DETAILS', Tools::getValue('EFIVE_MANDAT_DETAILS'));
             Configuration::updateValue('EFIVE_MANDAT_MAIL', Tools::getValue('EFIVE_MANDAT_MAIL'));
             Configuration::updateValue('EFIVE_MANDAT_ADDRESS', Tools::getValue('EFIVE_MANDAT_ADDRESS'));
-
-            $custom_text = [];
-            $languages = Language::getLanguages(false);
-            foreach ($languages as $lang) {
-                if (Tools::getIsset('EFIVE_MANDAT_CUSTOM_TEXT_' . $lang['id_lang'])) {
-                    $custom_text[$lang['id_lang']] = Tools::getValue('EFIVE_MANDAT_CUSTOM_TEXT_' . $lang['id_lang']);
-                }
-            }
-            Configuration::updateValue('EFIVE_MANDAT_CUSTOM_TEXT', $custom_text);
         }
         $this->_html .= $this->displayConfirmation($this->trans('Settings updated', [], 'Admin.Global'));
     }
@@ -313,13 +303,6 @@ class Efive_Mandat extends PaymentModule
                 ],
                 'input' => [
                     [
-                        'type' => 'textarea',
-                        'label' => $this->l('Information to the customer'),
-                        'name' => 'EFIVE_MANDAT_CUSTOM_TEXT',
-                        'desc' => $this->l('Information on the processing (processing time, starting of the shipping...)'),
-                        'lang' => true,
-                    ],
-                    [
                         'type' => 'switch',
                         'label' => $this->l('Display the invitation to pay in the order confirmation page'),
                         'name' => self::FLAG_DISPLAY_PAYMENT_INVITE,
@@ -368,20 +351,10 @@ class Efive_Mandat extends PaymentModule
 
     public function getConfigFieldsValues()
     {
-        $custom_text = [];
-        $languages = Language::getLanguages(false);
-        foreach ($languages as $lang) {
-            $custom_text[$lang['id_lang']] = Tools::getValue(
-                'EFIVE_MANDAT_CUSTOM_TEXT_' . $lang['id_lang'],
-                Configuration::get('EFIVE_MANDAT_CUSTOM_TEXT', $lang['id_lang'])
-            );
-        }
-
         return [
             'EFIVE_MANDAT_DETAILS' => Tools::getValue('EFIVE_MANDAT_DETAILS', $this->details),
             'EFIVE_MANDAT_MAIL' => Tools::getValue('EFIVE_MANDAT_MAIL', $this->mail),
             'EFIVE_MANDAT_ADDRESS' => Tools::getValue('EFIVE_MANDAT_ADDRESS', $this->address),
-            'EFIVE_MANDAT_CUSTOM_TEXT' => $custom_text,
             self::FLAG_DISPLAY_PAYMENT_INVITE => Tools::getValue(
                 self::FLAG_DISPLAY_PAYMENT_INVITE,
                 Configuration::get(self::FLAG_DISPLAY_PAYMENT_INVITE)
@@ -412,17 +385,11 @@ class Efive_Mandat extends PaymentModule
             $mandatAddress = '___________';
         }
 
-        $mandatCustomText = Tools::nl2br(Configuration::get('EFIVE_MANDAT_CUSTOM_TEXT', $this->context->language->id));
-        if (empty($mandatCustomText)) {
-            $mandatCustomText = '';
-        }
-
         return [
             'total' => $total,
             'mandatDetails' => $mandatDetails,
             'mandatAddress' => $mandatAddress,
-            'mandatEmail' => $mandatEmail,
-            'mandatCustomText' => $mandatCustomText,
+            'mandatEmail' => $mandatEmail
         ];
     }
 

@@ -19,7 +19,7 @@
 
 <div class="alert alert-info">
   <img src="../modules/efive_mandat/logo.png" style="float:left; margin-right:15px;" height="60">
-  <p><strong>{l s="This module allows you to accept secure payments by administrative mandat." d='Modules.Efivemandat.Admin'}</strong></p>
-  <p>{l s="If the client chooses to pay by administrative mandat, the order status will change to 'Waiting for Payment'." d='Modules.Efivemandat.Admin'}</p>
-  <p>{l s="That said, you must manually confirm the order upon receiving the mandat." d='Modules.Efivemandat.Admin'}</p>
+  <p><strong>{l s="This module allows you to accept secure payments by administrative mandat." mod='efive_mandat'}</strong></p>
+  <p>{l s="If the client chooses to pay by administrative mandat, the order status will change to 'Waiting for Payment'." mod='efive_mandat'}</p>
+  <p>{l s="That said, you must manually confirm the order upon receiving the mandat." mod='efive_mandat'}</p>
 </div>
